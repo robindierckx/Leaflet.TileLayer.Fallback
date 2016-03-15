@@ -40,87 +40,46 @@
 			version: '0.1.0'
 		},
 
-		options: {
-			minNativeZoom: 0
-		},
+		urlTemplates : [],
 
-		initialize: function (urlTemplate, options) {
+		initialize: function (urlTemplates, options) {
+			var urlTemplate = urlTemplates.shift();
+			this.urlTemplates = urlTemplates;
 			TLproto.initialize.call(this, urlTemplate, options);
 		},
 
 		_loadTile: function (tile, tilePoint) {
 			TLproto._loadTile.call(this, tile, tilePoint);
-			tile._originalTilePoint = tilePoint;
-			tile._originalSrc = tile.src;
+			tile._tilePoint = tilePoint;
 		},
 
 		_tileOnError: function () {
-			var layer = this._layer,
-				originalTilePoint = this._originalTilePoint,
-				tilePoint = this._tilePoint = this._tilePoint || L.extend({}, originalTilePoint),
-				fallbackZoom = this._fallbackZoom = (this._fallbackZoom || originalTilePoint.z) - 1,
-				scale = this._fallbackScale = (this._fallbackScale || 1) * 2,
-				tileSize = layer._getTileSize(),
-				newUrl, top, left;
+			var layer = this._layer;
+			var currentUrl = this._currentUrl = this._currentUrl || 0;
+			var newUrl = layer.options.errorTileUrl;
+			if(currentUrl < urlTemplates.length)
+			{
+				var cUrlTemplate = layer.urlTemplates[currentUrl];
 
-			// If no lower zoom tiles are available, fallback to errorTile.
-			if (fallbackZoom < layer.options.minNativeZoom) {
-				layer.fire('tileerror', {
-					tile: this,
-					url: this.src
-				});
-
-				newUrl = layer.options.errorTileUrl;
-				if (newUrl) {
-					this.src = newUrl;
-				}
-
-				layer._tileLoaded();
-				return;
+				newUrl = L.Util.template(cUrlTemplate, L.extend({
+					s: layer._getSubdomain(this._tilePoint),
+					z: this._tilePoint.z,
+					x: this._tilePoint.x,
+					y: this._tilePoint.y
+					}, layer.options));
 			}
-
-			// Modify tilePoint for replacement img.
-			tilePoint.z = fallbackZoom;
-			tilePoint.x = Math.floor(tilePoint.x / 2);
-			tilePoint.y = Math.floor(tilePoint.y / 2);
-
-			// Generate new src path.
-			newUrl = layer.getTileUrl(tilePoint);
-
-			// Zoom replacement img.
-			this.style.width = this.style.height = (tileSize * scale) + 'px';
-
-			// Compute margins to adjust position.
-			top = (originalTilePoint.y - tilePoint.y * scale) * tileSize;
-			this.style.marginTop = (-top) + 'px';
-			left = (originalTilePoint.x - tilePoint.x * scale) * tileSize;
-			this.style.marginLeft = (-left) + 'px';
-
-			// Crop (clip) image.
-			// `clip` is deprecated, but browsers support for `clip-path: inset()` is far behind.
-			// http://caniuse.com/#feat=css-clip-path
-			this.style.clip = 'rect(' + top + 'px ' + (left + tileSize) + 'px ' + (top + tileSize) + 'px ' + left + 'px)';
-
+			this._currentUrl = (this._currentUrl + 1)%(urlTemplates.length+1);
+			
 			layer.fire('tilefallback', {
 				tile: this,
-				url: this._originalSrc,
-				urlMissing: this.src,
+				url: this.src,
 				urlFallback: newUrl
 			});
 
-			this.src = newUrl;
-		},
-
-		_resetTile: function (tile) {
-			var tileSize = this._getTileSize() + 'px';
-
-			delete tile._originalTilePoint;
-			delete tile._fallbackZoom;
-			delete tile._fallbackScale;
-			tile.style = {
-				width: tileSize,
-				height: tileSize
-			};
+			if (newUrl) {
+				this.src = newUrl;
+			}
+			layer._tileLoaded();
 		}
 
 	});
