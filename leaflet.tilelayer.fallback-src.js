@@ -57,7 +57,7 @@
 			var layer = this._layer;
 			var currentUrl = this._currentUrl = this._currentUrl || 0;
 			var newUrl = layer.options.errorTileUrl;
-			if(currentUrl < urlTemplates.length)
+			if(currentUrl < layer.urlTemplates.length)
 			{
 				var cUrlTemplate = layer.urlTemplates[currentUrl];
 
