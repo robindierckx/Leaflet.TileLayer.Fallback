@@ -1,6 +1,6 @@
 # Leaflet.TileLayer.Fallback
 
-Plugin for Leaflet. Replaces missing Tiles (404 error) by scaled lower zoom Tiles.
+Plugin for Leaflet. Tries to load from another url if the first one is not available.
 
 [Leaflet](http://leafletjs.com/) is the leading open-source JavaScript library
 for mobile-friendly interactive maps.
@@ -12,12 +12,6 @@ Current TileLayer.Fallback version: 0.1.0
 ## Requirements
 
 - Leaflet stable (0.7.x)
-
-
-
-## Demo
-[TileLayer.Fallback demonstration page](http://ghybs.github.io/Leaflet.TileLayer.Fallback/examples/tileLayerFallback-demo.html)
-
 
 
 ## Usage instructions
@@ -34,10 +28,10 @@ Current TileLayer.Fallback version: 0.1.0
 **JavaScript:**
 
 ```javascript
-var myTileLayer = L.tileLayer.fallback(url, options);
+var myTileLayer = L.tileLayer.fallback([url,urlFallback], options);
 ```
 
-Now missing tiles will be automatically replaced by scaled up tiles from lower zoom levels.
+Now missing tiles will be automatically replaced by tiles from another url
 
 
 ### Installing the plugin
@@ -51,7 +45,7 @@ Leaflet script (whether in the HTML head or body).
 Simply use the `L.tileLayer.fallback` factory instead of your regular `L.tileLayer`:
 
 ```javascript
-var myTileLayer = L.tileLayer.fallback(url, options);
+var myTileLayer = L.tileLayer.fallback(urls, options);
 
 myTileLayer.addTo(map);
 ```
@@ -64,14 +58,10 @@ myTileLayer.addTo(map);
 
 | Factory | Description |
 | :------ | :---------- |
-| **L.tileLayer.fallback**( `<String>` [urlTemplate](http://leafletjs.com/reference.html#url-template), [`<TileLayer options>`](#options) options? ) | Instantiates a tile layer object given a [URL template](http://leafletjs.com/reference.html#url-template) and optionally an options object. When tile images return a 404 error, they are replaced by a scaled up tile from lower zoom. |
+| **L.tileLayer.fallback**( [`<String>` [urlTemplate](http://leafletjs.com/reference.html#url-template)], [`<TileLayer options>`](#options) options? ) | Instantiates a tile layer object given an array of [URL template](http://leafletjs.com/reference.html#url-template) and optionally an options object. When tile images return a 404 error, they are replaced by tiles from the other servers. |
 
 
 ### Options
-
-| Option | Type | Default | Description |
-| :----- | :--- | :------ | :---------- |
-| **minNativeZoom** | `Number` | 0 | Minimum zoom number the tiles source has available. If tiles are missing down to that zoom level (included), they will be replaced by the standard Error Tile (specified by [`errorTileUrl`](http://leafletjs.com/reference.html#tilelayer-errortileurl)). |
 
 All other [TileLayer options](http://leafletjs.com/reference.html#tilelayer-options) are applicable.
 
@@ -80,7 +70,7 @@ All other [TileLayer options](http://leafletjs.com/reference.html#tilelayer-opti
 
 | Event | Data | Description |
 | :---- | :--- | :---------- |
-| **tilefallback** | [`TileFallbackEvent`](#tilefallbackevent) | Fired when a tile is being replaced by a scaled up tile of lower zoom. |
+| **tilefallback** | [`TileFallbackEvent`](#tilefallbackevent) | Fired when a tile is being replaced. |
 
 All other [TileLayer events](http://leafletjs.com/reference.html#tilelayer-loading) are applicable.
 
@@ -103,18 +93,16 @@ Leaflet.TileLayer.Fallback does not provide any extra method beyond regular
 
 
 ## Limitations
-TileLayer.Fallback plugin tries to replace each missing tile by its immediate
-lower zoom equivalent, and if that one is also missing, it goes to lower zoom
-again; and so on until a tile image is returned by the server, or it reaches
-[`minNativeZoom`](#options).
+TileLayer.Fallback plugin tries to replace each missing tile by tiles from another server. But if the tile is missing on every server (which is rare), it will just display no tile at all.
 
 That means it has to wait for the server to return a 404 error before attempting
-to replace the tile by a lower zoom equivalent. If several zoom levels are
-missing, it has to wait as many times as the number of missing zooms. Therefore,
-the more missing zoom levels, the more time it takes to replace a tile.
+to replace the tile. If several tiles are
+missing, it has to wait as many times as the number of missing tiles. Therefore,
+the more missing tiles, the more time it takes to replace a tile.
 
 
 
 ## License
+This is a fork of ghybs/Leaflet.TileLayer.Fallback (https://github.com/ghybs/Leaflet.TileLayer.Fallback) which has a different operating mode.
 
 Leaflet.TileLayer.Fallback is distributed under the [Apache 2.0 License](http://choosealicense.com/licenses/apache-2.0/).
