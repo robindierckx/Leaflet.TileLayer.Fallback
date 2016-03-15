@@ -68,7 +68,7 @@
 					y: this._tilePoint.y
 					}, layer.options));
 			}
-			this._currentUrl = (this._currentUrl + 1)%(urlTemplates.length+1);
+			this._currentUrl = (this._currentUrl + 1)%(layer.urlTemplates.length+1);
 			
 			layer.fire('tilefallback', {
 				tile: this,
