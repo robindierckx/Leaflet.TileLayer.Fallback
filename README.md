@@ -1,5 +1,7 @@
 # Leaflet.TileLayer.Fallback
 
+**FORK FROM [BenjaminVadant/Leaflet.TileLayer.Fallback](https://github.com/BenjaminVadant/Leaflet.TileLayer.Fallback) that is compatible with Leaflet 1.0.3**
+
 Plugin for Leaflet. Tries to load from another url if the first one is not available.
 
 [Leaflet](http://leafletjs.com/) is the leading open-source JavaScript library
@@ -11,7 +13,7 @@ Current TileLayer.Fallback version: 0.1.0
 
 ## Requirements
 
-- Leaflet stable (0.7.x)
+- Leaflet stable (1.0.x)
 
 
 ## Usage instructions

@@ -54,6 +54,7 @@
 		},
 
 		_tileOnError: function () {
+			console.log("THIIISSSSSSSSSSSSSSSSS", this)
 			var layer = this._layer;
 			var currentUrl = this._currentUrl = this._currentUrl || 0;
 			var newUrl = layer.options.errorTileUrl;
