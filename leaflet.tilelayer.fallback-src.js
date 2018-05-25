@@ -48,39 +48,45 @@
 			TLproto.initialize.call(this, urlTemplate, options);
 		},
 
+		createTile: function (coords, done) {
+			var tile = L.TileLayer.prototype.createTile.call(this, coords, done);
+			tile._originalCoords = coords;
+			tile._originalSrc = tile.src;
+
+			return tile;
+		},
+
 		_loadTile: function (tile, tilePoint) {
 			TLproto._loadTile.call(this, tile, tilePoint);
 			tile._tilePoint = tilePoint;
 		},
 
-		_tileOnError: function () {
-			console.log("THIIISSSSSSSSSSSSSSSSS", this)
-			var layer = this._layer;
-			var currentUrl = this._currentUrl = this._currentUrl || 0;
+		_tileOnError: function (done,tile,e) {
+			var layer = this;
+			var currentUrl = tile._currentUrl = tile._currentUrl || 0;
+			var coords = tile._originalCoords;
 			var newUrl = layer.options.errorTileUrl;
 			if(currentUrl < layer.urlTemplates.length)
 			{
 				var cUrlTemplate = layer.urlTemplates[currentUrl];
-
 				newUrl = L.Util.template(cUrlTemplate, L.extend({
-					s: layer._getSubdomain(this._tilePoint),
-					z: this._tilePoint.z,
-					x: this._tilePoint.x,
-					y: this._tilePoint.y
+					z: coords.z,
+					x: coords.x,
+					y: coords.y
 					}, layer.options));
 			}
-			this._currentUrl = (this._currentUrl + 1)%(layer.urlTemplates.length+1);
+			tile._currentUrl = (tile._currentUrl + 1)%(layer.urlTemplates.length+1);
 			
 			layer.fire('tilefallback', {
-				tile: this,
-				url: this.src,
+				tile: tile,
+				url: tile.src,
 				urlFallback: newUrl
 			});
 
 			if (newUrl) {
-				this.src = newUrl;
+				tile.src = newUrl;
 			}
-			layer._tileLoaded();
+			//layer._tileLoaded();
 		}
 
 	});
@@ -95,3 +101,4 @@
 	// Just return a value to define the module export.
 	return FallbackTileLayer;
 }));
+
